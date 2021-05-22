@@ -1,9 +1,10 @@
 # Simple-JSON-Parser (SJP)
 `SJP` is a minimal JSON parser that (almost) fully implements the JSON spec at
-(https://www.json.org/json-en.html)[https://www.json.org/json-en.html]. It is
-written in fairly clean C++ and the interface is designed to make data from a
-JSON file easily accessible without a complicated API or any extra
-dependencies. The following headers are used internally:
+[www.json.org](https://www.json.org/json-en.html). It is written in fairly
+clean C++ and the interface is designed to make data from a JSON file easily
+accessible without a complicated API or any extra dependencies. The following
+headers are used internally and most of them could be replaced to be even more
+minimal:
 
 - `cassert`
 - `cmath`
@@ -35,7 +36,7 @@ public:
 };
 ```
 
-Then, replace `io.cc` with your mplementation file.
+Then, replace the contents of `io.cc` with your implementation.
 
 The `io.hh` header actually provides a `NullLogger` that doesn't do anything
 and can be used if no logging should be done. Without a logger, you will only
