@@ -1,3 +1,8 @@
+<p align="center">
+    <a href="https://github.com/DanielSchuette/SJP" alt="Contributors">
+        <img src="https://img.shields.io/badge/version-0.1-blue" /></a>
+</p>
+
 # Simple-JSON-Parser (SJP)
 `SJP` is a minimal JSON parser that (almost) fully implements the JSON spec at
 [www.json.org](https://www.json.org/json-en.html). It is written in fairly
@@ -57,6 +62,11 @@ compiler). Run the following in the repository's base directory:
 make test
 ```
 
+Since we don't link any external dependencies in, any IDE should be easily able
+to compile the code, too. When you use `SJP` as a library, simply copy `src/*`
+into your project and include `sjp.hh` and `io.hh` where you need the parser
+and/or the `JSON` object. Yes, It is honestly __that__ easy!
+
 # To-Do's
 The only thing from the spec that we don't currently support are unicode code
 points in string literals, i.e. right now `\uXXXX` is just ignored. For all my
@@ -66,7 +76,7 @@ There are a few things in the source that might need a fix. They're annotated
 with `@TODO` and you can grep for them. Nothing big, though.
 
 Lastly, we don't have a proper test suite right now. I've used this code as a
-library quite a bit, but if you find a bug, I'll add regression tests ---
+library quite a bit, but if you find a bug, I'll add regression tests -
 I promise!
 
 # License
