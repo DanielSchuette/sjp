@@ -1,0 +1,27 @@
+{
+    "name": "John B. \"\tDoe\t\"!",
+    "format": {
+        "type":       "rect",
+        "width":      1920,
+        "height":     1080,
+        "interlace":  false,
+        "frame rate": 24,
+        "modes": [1, 2, 3, 4, 5, true],
+        "hex stuff": ["\u0182", "\u00e6", "\u3164", "\u3165", "\u00d8"],
+        "array of objects": [
+            {
+                "abc": true,
+                "def": false
+            },
+            {
+                "abc": false,
+                "def": true
+            }
+        ]
+    },
+    "data": {
+        "deeply": {
+            "nested": [-0.124, 4230.0, 3.1415, 0, 1, 2, 3, 4]
+        }
+    }
+}
