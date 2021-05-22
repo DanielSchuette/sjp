@@ -77,16 +77,23 @@ public:
     JsonNone(size_t l, size_t c) : JsonValue(l, c) {}
     ~JsonNone(void) {}
 
-    virtual Type get_type(void) override { return Type::None; }
+    virtual Type       get_type(void)     override { return Type::None; }
     virtual JsonValue& operator[](size_t) override { return *this; }
     virtual JsonValue& operator[](const std::string&) override
     { return *this; }
 };
 
-// This is the default value that's referenced whenever the user tries to
-// access a non-existant field on a JSONVALUE.
+/* This is the default value that's referenced whenever the user tries to
+ * access a non-existant field on a JSONVALUE.
+ */
 static sjp::JsonNone default_json_none(0, 0);
 
+/* For composite types (i.e. JSONOBJECT, JSONARRAY), we don't allow access of
+ * the underlying data structures by the user. The same is true for adding
+ * values. The user must call OPERATOR[] to get to the data.
+ * @NOTE: Maybe, we can come up with a method of accessing the data without
+ * requiring the user to do a cast?
+ */
 class sjp::JsonObject : public JsonValue {
     /* To be able to retrieve elements in O(1) time _and_ remember the
      * insertion order, we need additional space.
