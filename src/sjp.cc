@@ -199,7 +199,7 @@ sjp::JsonValue* sjp::Parser::string(void)
             case 'r': str_val += '\r'; break;
             case 't': str_val += '\t'; break;
             case 'u':
-                get_unicode_from_hex(); // @incomplete
+                get_unicode_from_hex();
                 break;
             default:
                 logger->warn("invalid escape sequence \\%c", c);
@@ -493,6 +493,7 @@ sjp::JsonValue& sjp::JsonArray::operator[](size_t i)
     return *(values[i]);
 }
 
+// @NOTE: Could it make sense to access arrays via strings?
 sjp::JsonValue& sjp::JsonArray::operator[](const std::string&)
 {
     return default_json_none;

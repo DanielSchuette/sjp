@@ -232,8 +232,9 @@ class sjp::JsonNull : public JsonValue {
 public:
     friend class sjp::Parser;
 
-    // @NOTE: JSONNULL is a primitive type, so for consistency we want a value
-    // on it. Since (probably) any value will do, we have a constant byte here.
+    /* @NOTE: JSONNULL is a primitive type, so for consistency we want a value
+     * on it. Since (probably) any value will do, we have a constant byte here.
+     */
     const uint8_t value = 0;
 
     JsonNull(size_t l, size_t c) : JsonValue(l, c) {}
@@ -305,9 +306,10 @@ class sjp::Parser {
     void unget_char(char);
     void ws(void);
 
-    // @TODO: We don't implement anything but ASCII streams right now. This
-    // obviously doesn't comply with the JSON spec which allows UTF8-encoded
-    // characters in its string literals.
+    /* @TODO: We don't implement anything but ASCII streams right now. This
+     * obviously doesn't comply with the JSON spec which allows UTF8-encoded
+     * characters in its string literals.
+     */
     char get_unicode_from_hex(void);
 
     JsonValue* json(void);
