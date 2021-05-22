@@ -69,7 +69,7 @@ public:
     SjpLogger(void) : SjpLogger("unknown", stderr) {}
     virtual ~SjpLogger(void) {}
 
-    // @TODO: Implement these.
+    // @TODO: Would it make sense to implement these?
     SjpLogger(const SjpLogger&) = delete;
     SjpLogger(SjpLogger&&)      = delete;
     SjpLogger& operator=(const SjpLogger&) = delete;
