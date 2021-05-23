@@ -33,20 +33,35 @@ int main(int /*argc*/, char** argv)
 
     auto parser = sjp::Parser(stream, &logger);
     sjp::Json json = parser.parse();
-    json.print(stderr);
+    json.print(stderr); // pretty-prints the parsed JSON to a FILE*
 
-    std::vector<double> v;
+    /* Now, we can read data from the SJP::JSON object.
+     * JSONOBJECTs are accessed via OPERATOR[] and string keys.
+     */
     sjp::JsonValue& array = json["data"]["deeply"]["nested"];
     assert(array.get_type() == sjp::Type::Array);
 
+    std::vector<double> v;
     for (size_t i = 0; i < array.size(); i++) {
-        sjp::JsonNumber& n = static_cast<sjp::JsonNumber&>(array[i]);
-        v.push_back(n.value);
+        /* JSONARRAYs are accessed via OPERATOR[] and integer keys.
+         * We get a JSONVALUE&, which we must cast to the actual type before
+         * the VALUE member (that every primitive type has) can be accessed.
+         * As seen above, we can always check JSONVALUE.GET_TYPE() to
+         * dynamically validate what kind of data we've got.
+         */
+        sjp::JsonValue& item = array[i];
+        if (item.get_type() == sjp::Type::Number) {
+            sjp::JsonNumber& n = static_cast<sjp::JsonNumber&>(item);
+            v.push_back(n.value);
+        } else {
+            logger.warn("ignoring non-number item of type `%s'",
+                        item.type_to_string().c_str());
+        }
     }
 
     double s = 0.0;
     std::for_each(v.begin(), v.end(), [&s](const double&d) { s += d; });
-    fprintf(stderr, "%g\n", s);
+    logger.log("sum over all number items in the array: %g", s);
 
     fclose(stream);
 

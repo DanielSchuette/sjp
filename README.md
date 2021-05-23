@@ -1,10 +1,10 @@
 <p align="center">
-    <a href="https://github.com/DanielSchuette/SJP" alt="Contributors">
+    <a href="https://github.com/DanielSchuette/sjp" alt="Contributors">
         <img src="https://img.shields.io/badge/version-0.1-blue" /></a>
 </p>
 
-# Simple-JSON-Parser (SJP)
-`SJP` is a minimal JSON parser that (almost) fully implements the JSON spec at
+# Simple-JSON-Parser (sjp)
+`sjp` is a minimal JSON parser that (almost) fully implements the JSON spec at
 [www.json.org](https://www.json.org/json-en.html). It is written in fairly
 clean C++ and the interface is designed to make data from a JSON file easily
 accessible without a complicated API or any extra dependencies. The following
@@ -54,16 +54,46 @@ requirement. You can verify the fact that we don't leak any allocations with
 `make leak-test` (requires `valgrind`).
 
 # Usage Example
-Take a look at `main.cc` for an example of how to use `SJP`. A
-[Makefile](./src/Makefile) is provided (again, my setup with `gcc` as the
-compiler). Run the following in the repository's base directory:
+Take a look at [`src/main.cc`](./src/main.cc) for an example of how to use
+`sjp`. A [Makefile](./src/Makefile) is provided (again, my setup with `gcc` as
+the compiler). Run `make test` to see what `sjp` can do for you.
 
-```bash
-make test
+Here's a snippet, taken from that file:
+
+```c++
+{
+    FILE* stream = fopen("some/file.json", "r");
+    auto logger = io::SjpLogger(*argv, stderr);
+    auto parser = sjp::Parser(stream, &logger);
+
+    sjp::Json json = parser.parse();
+    json.print(stderr); // pretty-prints the parsed JSON to a FILE*
+
+    /* Now, we can read data from the SJP::JSON object.
+     * JSONOBJECTs are accessed via OPERATOR[] and string keys.
+     */
+    sjp::JsonValue& array = json["data"]["deeply"]["nested"];
+    assert(array.get_type() == sjp::Type::Array);
+
+    std::vector<double> v;
+    for (size_t i = 0; i < array.size(); i++) {
+        /* JSONARRAYs are accessed via OPERATOR[] and integer keys.
+         * We get a JSONVALUE&, which we must cast to the actual type before
+         * the VALUE member (that every primitive type has) can be accessed.
+         * As seen above, we can always check JSONVALUE.GET_TYPE() to
+         * dynamically validate what kind of data we've got.
+         */
+        sjp::JsonNumber& n = static_cast<sjp::JsonNumber&>(array[i]);
+        v.push_back(n.value);
+    }
+}
 ```
 
+`sjp` only has a few API functions you need to know about and those are pretty
+much all demonstrated in [`src/main.cc`](./src/main.cc).
+
 Since we don't link any external dependencies in, any IDE should be easily able
-to compile the code, too. When you use `SJP` as a library, simply copy `src/*`
+to compile the code, too. When you use `sjp` as a library, simply copy `src/*`
 into your project and include `sjp.hh` and `io.hh` where you need the parser
 and/or the `JSON` object. Yes, It is honestly __that__ easy!
 
