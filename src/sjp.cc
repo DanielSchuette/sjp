@@ -72,7 +72,7 @@ sjp::Json sjp::Parser::parse(void)
         logger->warn("expected EOF after top-level JSON object, got `%c' "
                      "at %s", c, cursor.to_string().c_str());
     else
-        logger->log("parser ran successfully (%ld line%s read)",
+        logger->log("sjp parser ran successfully (%ld line%s read)",
                     cursor.line_no, cursor.line_no > 1 ? "s" : "");
 
     return sjp::Json(root);

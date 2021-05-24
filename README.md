@@ -95,7 +95,7 @@ much all demonstrated in [`src/main.cc`](./src/main.cc).
 Since we don't link any external dependencies in, any IDE should be easily able
 to compile the code, too. When you use `sjp` as a library, simply copy `src/*`
 into your project and include `sjp.hh` and `io.hh` where you need the parser
-and/or the `JSON` object. Yes, It is honestly __that__ easy!
+and/or the `JSON` object. Yes, it is honestly __that__ easy!
 
 # To-Do's
 The only thing from the spec that we don't currently support are unicode code
@@ -108,6 +108,10 @@ with `@TODO` and you can grep for them. Nothing big, though.
 Lastly, we don't have a proper test suite right now. I've used this code as a
 library quite a bit, but if you find a bug, I'll add regression tests -
 I promise!
+
+Maybe we should prefix logger callers with the library name to improve the
+readability of logging outputs. I usually prefer to once log the filename of
+the JSON file that I'm parsing before I start the parser.
 
 # License
 All code in this repository is licensed under the [GPLv3](./LICENSE.md).
