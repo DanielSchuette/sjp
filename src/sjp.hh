@@ -21,9 +21,10 @@
 #ifndef _JSON_HH_
 #define _JSON_HH_
 
-#include <unordered_map>
-#include <string>
+#include <optional>
 #include <queue>
+#include <string>
+#include <unordered_map>
 
 #include "common.hh"
 #include "io.hh"
@@ -63,6 +64,12 @@ public:
     virtual Type        get_type(void) = 0;
     virtual JsonValue&  operator[](size_t) = 0;
     virtual JsonValue&  operator[](const std::string&) = 0;
+
+    virtual std::optional<double>      get_number(void) { return std::nullopt; }
+    virtual std::optional<std::string> get_string(void) { return std::nullopt; }
+    virtual std::optional<bool>        get_bool(void)   { return std::nullopt; }
+    // @NOTE: We should improve this return value. But right now, it's okay.
+    virtual std::optional<void*>       get_null(void)   { return std::nullopt; }
 
     virtual size_t      size(void)           { return 1; }
     virtual std::string type_to_string(void) { return type_to_str(get_type()); }
@@ -165,6 +172,9 @@ public:
     virtual JsonValue& operator[](const std::string&) override
     { return default_json_none; }
 
+    virtual std::optional<std::string> get_string(void) override
+    { return this->value; }
+
     virtual void print(FILE* stream, size_t) override
     { fprintf(stream, "\"%s\"", value.c_str()); }
 };
@@ -188,6 +198,9 @@ public:
     virtual JsonValue& operator[](const std::string&) override
     { return default_json_none; }
 
+    virtual std::optional<double> get_number(void) override
+    { return this->value; }
+
     virtual void print(FILE* stream, size_t) override
     { fprintf(stream, "%g", value); }
 };
@@ -208,8 +221,14 @@ public:
 
     virtual JsonValue& operator[](const std::string&) override
     { return default_json_none; }
+
+    virtual std::optional<bool> get_bool(void) override
+    { return this->value; }
 };
 
+/* @NOTE: Having two classes to model TRUE and FALSE values is probably
+ * redundant.
+ */
 class sjp::JsonFalse : public JsonValue {
 public:
     friend class sjp::Parser;
@@ -226,6 +245,9 @@ public:
 
     virtual JsonValue& operator[](const std::string&) override
     { return default_json_none; }
+
+    virtual std::optional<bool> get_bool(void) override
+    { return this->value; }
 };
 
 class sjp::JsonNull : public JsonValue {
@@ -247,6 +269,9 @@ public:
 
     virtual JsonValue& operator[](const std::string&) override
     { return default_json_none; }
+
+    virtual std::optional<void*> get_null(void) override
+    { return nullptr; }
 };
 
 class sjp::Json {

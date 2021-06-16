@@ -77,14 +77,25 @@ Here's a snippet, taken from that file:
 
     std::vector<double> v;
     for (size_t i = 0; i < array.size(); i++) {
+        sjp::JsonValue& item = array[i];
+
         /* JSONARRAYs are accessed via OPERATOR[] and integer keys.
          * We get a JSONVALUE&, which we must cast to the actual type before
          * the VALUE member (that every primitive type has) can be accessed.
          * As seen above, we can always check JSONVALUE.GET_TYPE() to
          * dynamically validate what kind of data we've got.
          */
-        sjp::JsonNumber& n = static_cast<sjp::JsonNumber&>(array[i]);
-        v.push_back(n.value);
+        if (item.get_type() == sjp::Type::Number) {
+            sjp::JsonNumber& n = static_cast<sjp::JsonNumber&>(item);
+            v.push_back(n.value);
+        }
+
+        /* The (probably better) alternative is to use polymorphic data
+         * accessors that return STD::OPTIONAL-wrapped values. Those can then
+         * be checked for actual content using the familiar C++ STL functions:
+         */
+        std::optional<double> opt_num = item.get_number();
+        if (opt_num) v.push_back(*opt_num);
     }
 }
 ```

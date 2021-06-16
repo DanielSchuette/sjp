@@ -43,20 +43,34 @@ int main(int /*argc*/, char** argv)
 
     std::vector<double> v;
     for (size_t i = 0; i < array.size(); i++) {
-        /* JSONARRAYs are accessed via OPERATOR[] and integer keys.
+        /* JSONARRAYs can be accessed via OPERATOR[] and integer keys.
          * We get a JSONVALUE&, which we must cast to the actual type before
          * the VALUE member (that every primitive type has) can be accessed.
          * As seen above, we can always check JSONVALUE.GET_TYPE() to
-         * dynamically validate what kind of data we've got.
+         * dynamically validate what kind of data we've got. The code is not
+         * very readable, though:
+         *
+         * sjp::JsonValue& item = array[i];
+         * if (item.get_type() == sjp::Type::Number) {
+         *     sjp::JsonNumber& n = static_cast<sjp::JsonNumber&>(item);
+         *     v.push_back(n.value);
+         * } else {
+         *     logger.warn("ignoring non-number item of type `%s'",
+         *                 item.type_to_string().c_str());
+         * }
+         */
+
+        /* The (probably better) alternative is to use polymorphic data
+         * accessors that return STD::OPTIONAL-wrapped values. Those can then
+         * be checked for actual content using the familiar C++ STL functions:
          */
         sjp::JsonValue& item = array[i];
-        if (item.get_type() == sjp::Type::Number) {
-            sjp::JsonNumber& n = static_cast<sjp::JsonNumber&>(item);
-            v.push_back(n.value);
-        } else {
+        std::optional<double> opt_num = item.get_number();
+        if (opt_num)
+            v.push_back(*opt_num);
+        else
             logger.warn("ignoring non-number item of type `%s'",
                         item.type_to_string().c_str());
-        }
     }
 
     double s = 0.0;

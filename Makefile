@@ -3,7 +3,7 @@
 SRC_DIR   = src
 BUILD_DIR = build
 BIN_DIR   = bin
-BIN       = json_parse
+BIN       = sjp
 
 # We specify globally applicable compiler options right here. They are exported
 # to all recursively called Makefiles.
