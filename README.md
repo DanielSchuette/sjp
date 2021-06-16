@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/DanielSchuette/sjp" alt="Contributors">
-        <img src="https://img.shields.io/badge/version-0.1-blue" /></a>
+        <img src="https://img.shields.io/badge/version-0.1.1-blue" /></a>
 </p>
 
 # Simple-JSON-Parser (sjp)
