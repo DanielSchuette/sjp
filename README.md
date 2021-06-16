@@ -11,6 +11,7 @@ accessible without a complicated API or any extra dependencies. The following
 headers are used internally and most of them could be replaced to be even more
 minimal:
 
+- `algorithm`
 - `cassert`
 - `cmath`
 - `cstdarg`
@@ -18,10 +19,10 @@ minimal:
 - `cstdio`
 - `cstdlib`
 - `cstring`
-- `algorithm`
-- `unordered_map`
-- `string`
+- `optional`
 - `queue`
+- `string`
+- `unordered_map`
 
 The small logger I usually use depends on the following headers:
 
