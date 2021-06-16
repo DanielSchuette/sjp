@@ -297,7 +297,7 @@ public:
 class sjp::Parser {
     // @NOTE: We don't own these pointers and don't free them.
     FILE* in_stream = nullptr;
-    const io::Logger* logger = nullptr;
+    const io::Logger* logger = nullptr; // we need a pointer to be able to swap
     std::queue<char> unget_queue = {};
 
     /* These point at the position of the last char read from IN_STREAM.
@@ -319,9 +319,6 @@ class sjp::Parser {
         void increment_line(void)
         { line_no++; prev_line_len = char_no; char_no = 0; }
     } cursor = {};
-
-    // @NOTE: Users cannot construct a parser without stream/logger.
-    Parser(void) {}
 
     [[nodiscard]] char get_char(void);
     [[nodiscard]] char peek_char(size_t = 1);
@@ -349,6 +346,7 @@ class sjp::Parser {
     JsonValue* null(void);
 
 public:
+    Parser(void) = delete;
     Parser(FILE*, const io::Logger*);
     ~Parser(void) { /* @NOTE: STREAM is _not_ freed. */ }
 
