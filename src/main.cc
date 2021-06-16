@@ -28,49 +28,54 @@ int main(int /*argc*/, char** argv)
     FILE* stream = fopen(infile, "r");
     assert(stream);
 
-    auto logger = io::SjpLogger(*argv, stderr);
+    io::SjpLogger logger { *argv, stderr };
     logger.log("reading from `%s'", infile);
 
-    auto parser = sjp::Parser(stream, &logger);
-    sjp::Json json = parser.parse();
+    sjp::Parser parser0 { stream, &logger };
+    auto parser { std::move(parser0) }; // move-constructable
+
+    sjp::Json json { parser.parse() };
     json.print(stderr); // pretty-prints the parsed JSON to a FILE*
 
     /* Now, we can read data from the SJP::JSON object.
      * JSONOBJECTs are accessed via OPERATOR[] and string keys.
      */
-    sjp::JsonValue& array = json["data"]["deeply"]["nested"];
+    sjp::JsonValue& array { json["data"]["deeply"]["nested"] };
     assert(array.get_type() == sjp::Type::Array);
 
-    std::vector<double> v;
+    std::vector<double> v {};
     for (size_t i = 0; i < array.size(); i++) {
+        sjp::JsonValue& item { array[i] };
+
         /* JSONARRAYs can be accessed via OPERATOR[] and integer keys.
          * We get a JSONVALUE&, which we must cast to the actual type before
          * the VALUE member (that every primitive type has) can be accessed.
          * As seen above, we can always check JSONVALUE.GET_TYPE() to
          * dynamically validate what kind of data we've got. The code is not
          * very readable, though:
-         *
-         * sjp::JsonValue& item = array[i];
-         * if (item.get_type() == sjp::Type::Number) {
-         *     sjp::JsonNumber& n = static_cast<sjp::JsonNumber&>(item);
-         *     v.push_back(n.value);
-         * } else {
-         *     logger.warn("ignoring non-number item of type `%s'",
-         *                 item.type_to_string().c_str());
-         * }
          */
+#if 0
+         if (item.get_type() == sjp::Type::Number) {
+             sjp::JsonNumber& n { static_cast<sjp::JsonNumber&>(item) };
+             v.push_back(n.value);
+         } else {
+             logger.warn("ignoring non-number item of type `%s'",
+                         item.type_to_string().c_str());
+         }
+#endif
 
         /* The (probably better) alternative is to use polymorphic data
          * accessors that return STD::OPTIONAL-wrapped values. Those can then
          * be checked for actual content using the familiar C++ STL functions:
          */
-        sjp::JsonValue& item = array[i];
-        std::optional<double> opt_num = item.get_number();
+#if 1
+        std::optional<double> opt_num { item.get_number() };
         if (opt_num)
             v.push_back(*opt_num);
         else
             logger.warn("ignoring non-number item of type `%s'",
                         item.type_to_string().c_str());
+#endif
     }
 
     double s = 0.0;

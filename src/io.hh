@@ -65,11 +65,11 @@ class io::SjpLogger : public io::Logger {
 
 public:
     SjpLogger(const char* name, FILE* os)
-        : prog_name(strip_dir(name)), out_stream(os) {}
-    SjpLogger(void) : SjpLogger("unknown", stderr) {}
+        : prog_name { strip_dir(name) }, out_stream { os } {}
+    SjpLogger(void) : SjpLogger { "unknown", stderr } {}
     virtual ~SjpLogger(void) {}
 
-    // @TODO: Would it make sense to implement these?
+    // @INCOMPLETE: Would it make sense to implement these?
     SjpLogger(const SjpLogger&) = delete;
     SjpLogger(SjpLogger&&)      = delete;
     SjpLogger& operator=(const SjpLogger&) = delete;

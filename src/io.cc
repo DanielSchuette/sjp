@@ -22,21 +22,18 @@
 
 #include "io.hh"
 
+const char* TIME_FORMAT = "[%F %H:%M:%S]";
+
 static void pr_time(FILE* stream)
 {
-    char buf[BUFSIZ];
-    time_t t;
-    struct tm* tm;
+    time_t t = time(nullptr);
+    struct tm* tm = localtime(&t);
 
-    t = time(nullptr);
-    tm = localtime(&t);
+    char buf[BUFSIZ] {};
+    if (!tm)                                              goto early_error;
+    if (strftime(buf, sizeof(buf), TIME_FORMAT, tm) == 0) goto early_error;
 
-    if (!tm)
-        goto early_error;
-    if (strftime(buf, sizeof(buf), "%F %H:%M:%S", tm) == 0)
-        goto early_error;
-
-    fprintf(stream, "[%s] ", buf);
+    fprintf(stream, "%s", buf);
     return;
 
 early_error:
@@ -50,8 +47,7 @@ void io::SjpLogger::log(const char* fmt, ...) const
 
     va_list ap;
     va_start(ap, fmt);
-
-    char* msg = nullptr;
+    char* msg {};
     int n = vsnprintf(msg, 0, fmt, ap);
     va_end(ap);
     if (n < 0) goto early_error;
@@ -66,7 +62,7 @@ void io::SjpLogger::log(const char* fmt, ...) const
 
     pr_time(out_stream);
     ansi::enable_color(ansi::AnsiColor::FG_BLUE, out_stream);
-    fprintf(out_stream, "%s: log:", prog_name);
+    fprintf(out_stream, " %s: log:", prog_name);
     ansi::reset_color(out_stream);
     fprintf(out_stream, " %s\n", msg);
 
@@ -85,7 +81,6 @@ void io::SjpLogger::warn(const char* fmt, ...) const
 
     va_list ap;
     va_start(ap, fmt);
-
     char* msg = nullptr;
     int n = vsnprintf(msg, 0, fmt, ap);
     va_end(ap);
@@ -101,7 +96,7 @@ void io::SjpLogger::warn(const char* fmt, ...) const
 
     pr_time(out_stream);
     ansi::enable_color(ansi::AnsiColor::FG_YELLOW, out_stream);
-    fprintf(out_stream, "%s: warning:", prog_name);
+    fprintf(out_stream, " %s: warning:", prog_name);
     ansi::reset_color(out_stream);
     fprintf(out_stream, " %s\n", msg);
 
@@ -125,7 +120,6 @@ early_error:
     int n = vsnprintf(msg, 0, fmt, ap);
     va_end(ap);
     if (n < 0) goto early_error;
-
     msg = (char*)malloc(n+1); // man 3 vsnprintf
     if (!msg) goto early_error;
 
@@ -136,7 +130,7 @@ early_error:
 
     pr_time(out_stream);
     ansi::enable_color(ansi::AnsiColor::FG_RED, out_stream);
-    fprintf(out_stream, "%s: error:", prog_name);
+    fprintf(out_stream, " %s: error:", prog_name);
     ansi::reset_color(out_stream);
     fprintf(out_stream, " %s\n", msg);
 
@@ -153,6 +147,7 @@ early_error:
 const char* ansi::color_to_str(AnsiColor color)
 {
     using _ = AnsiColor;
+    // using enum AnsiColor; // clang-tidy for some reason cannot handle this
 
     switch (color) {
     case _::RESET:     return "\x1b[0m";
@@ -175,8 +170,7 @@ const char* ansi::color_to_str(AnsiColor color)
 
 void ansi::enable_color(AnsiColor color, FILE* stream)
 {
-    if (!isatty(fileno(stream)))
-        return;
+    if (!isatty(fileno(stream))) return;
 
     const char* color_str = color_to_str(color);
     fprintf(stream, "%s", color_str);
@@ -184,8 +178,7 @@ void ansi::enable_color(AnsiColor color, FILE* stream)
 
 void ansi::reset_color(FILE* stream)
 {
-    if (!isatty(fileno(stream)))
-        return;
+    if (!isatty(fileno(stream))) return;
 
     const char* reset_str = color_to_str(AnsiColor::RESET);
     fprintf(stream, "%s", reset_str);

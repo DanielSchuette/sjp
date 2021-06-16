@@ -35,7 +35,7 @@ static std::string padding(size_t size)
 }
 
 sjp::Parser::Parser(FILE* is, const io::Logger* log)
-    : in_stream(is), logger(log), unget_queue()
+    : in_stream { is }, logger { log }, unget_queue {}
 {
     // We heavily rely on this pointer _not_ being NULL. Be sure to check that.
     if (!logger)           fail("logger must not be NULL", 1);
@@ -45,13 +45,13 @@ sjp::Parser::Parser(FILE* is, const io::Logger* log)
 }
 
 sjp::Parser::Parser(const Parser& other) noexcept
-    : in_stream(other.in_stream), logger(other.logger),
-      unget_queue(other.unget_queue), cursor(other.cursor)
+    : in_stream { other.in_stream }, logger { other.logger },
+      unget_queue { other.unget_queue }, cursor { other.cursor }
 {
 }
 
 sjp::Parser::Parser(Parser&& other) noexcept
-    : Parser()
+    : Parser {}
 {
     swap(*this, other);
 }
@@ -67,8 +67,7 @@ sjp::Json sjp::Parser::parse(void)
 {
     JsonValue* root = json();
 
-    char c;
-    if ((c = get_char()) != EOF)
+    if (char c = get_char(); c != EOF)
         logger->warn("expected EOF after top-level JSON object, got `%c' "
                      "at %s", c, cursor.to_string().c_str());
     else
@@ -349,12 +348,11 @@ sjp::JsonValue* sjp::Parser::null(void)
 
 /* For readability, we enforce usage of EAT_CHAR whenever a byte from the
  * stream should be consumed without the caller looking at it (that's why
- * GET_CHAR is marked `nodiscard').
+ * GET_CHAR is marked NODISCARD).
  */
 void sjp::Parser::eat_char(void)
 {
-    char c = get_char();
-    (void)c;
+    [[maybe_unused]] char c = get_char();
 }
 
 void sjp::Parser::match_char(char e)
@@ -449,7 +447,7 @@ void sjp::JsonObject::print(FILE* stream, size_t d)
 {
     fprintf(stream, "{\n");
     for (size_t i = 0; i < names_in_order.size(); i++) {
-        const std::string& name = names_in_order[i];
+        const std::string& name { names_in_order[i] };
         JsonValue* value = values[name];
         fprintf(stream, "%s\"%s\": ", padding(d+1).c_str(), name.c_str());
         value->print(stream, d+1);
@@ -475,7 +473,7 @@ sjp::JsonValue& sjp::JsonObject::operator[](size_t i)
 {
     if (names_in_order.size() <= i)
         return default_json_none;
-    const std::string& name = names_in_order[i];
+    const std::string& name { names_in_order[i] };
     return *(values[name]);
 }
 

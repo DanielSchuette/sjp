@@ -58,12 +58,15 @@ protected:
     size_t line_no, char_no;
 
 public:
-    JsonValue(size_t l, size_t c) : line_no(l), char_no(c) {}
+    JsonValue(size_t l, size_t c) : line_no { l }, char_no { c } {}
     virtual ~JsonValue(void) {};
 
-    virtual Type        get_type(void) = 0;
-    virtual JsonValue&  operator[](size_t) = 0;
-    virtual JsonValue&  operator[](const std::string&) = 0;
+    virtual Type get_type(void) = 0;
+
+    // @NOTE: Since DEFAULT_JSON_NONE is still incomplete, we cannot create
+    // implementations yet.
+    virtual JsonValue& operator[](size_t) = 0;
+    virtual JsonValue& operator[](const std::string&) = 0;
 
     virtual std::optional<double>      get_number(void) { return std::nullopt; }
     virtual std::optional<std::string> get_string(void) { return std::nullopt; }
@@ -81,7 +84,7 @@ class sjp::JsonNone : public JsonValue {
 public:
     friend class sjp::Parser;
 
-    JsonNone(size_t l, size_t c) : JsonValue(l, c) {}
+    using JsonValue::JsonValue;
     ~JsonNone(void) {}
 
     virtual Type       get_type(void)     override { return Type::None; }
@@ -113,7 +116,7 @@ class sjp::JsonObject : public JsonValue {
 public:
     friend class sjp::Parser;
 
-    JsonObject(size_t l, size_t c) : JsonValue(l, c) {}
+    using JsonValue::JsonValue;
     virtual ~JsonObject(void)
     { for (const std::string& name: names_in_order) delete values[name]; }
 
@@ -133,7 +136,7 @@ class sjp::JsonArray : public JsonValue {
 public:
     friend class sjp::Parser;
 
-    JsonArray(size_t l, size_t c) : JsonValue(l, c) {}
+    using JsonValue::JsonValue;
     virtual ~JsonArray(void) { for (JsonValue* n: values) delete n; }
 
     virtual Type   get_type(void) override { return Type::Array; }
@@ -157,7 +160,7 @@ public:
      */
     std::string value = "";
 
-    JsonString(size_t l, size_t c) : JsonValue(l, c) {}
+    using JsonValue::JsonValue;
     virtual ~JsonString(void) {}
 
     virtual Type get_type(void) override { return Type::String; }
@@ -187,7 +190,7 @@ public:
 
     double value = 0.0;
 
-    JsonNumber(size_t l, size_t c) : JsonValue(l, c) {}
+    using JsonValue::JsonValue;
     virtual ~JsonNumber(void) {}
 
     virtual Type get_type(void) override { return Type::Number; }
@@ -211,7 +214,7 @@ public:
 
     const bool value = true;
 
-    JsonTrue(size_t l, size_t c) : JsonValue(l, c) {}
+    using JsonValue::JsonValue;
     virtual ~JsonTrue(void) {}
 
     virtual Type get_type(void) override { return Type::True; }
@@ -235,7 +238,7 @@ public:
 
     const bool value = false;
 
-    JsonFalse(size_t l, size_t c) : JsonValue(l, c) {}
+    using JsonValue::JsonValue;
     virtual ~JsonFalse(void) {}
 
     virtual Type get_type(void) override { return Type::False; }
@@ -259,7 +262,7 @@ public:
      */
     const uint8_t value = 0;
 
-    JsonNull(size_t l, size_t c) : JsonValue(l, c) {}
+    using JsonValue::JsonValue;
     virtual ~JsonNull(void) {}
 
     virtual Type get_type(void) override { return Type::Null; }
@@ -297,13 +300,17 @@ public:
 class sjp::Parser {
     // @NOTE: We don't own these pointers and don't free them.
     FILE* in_stream = nullptr;
-    const io::Logger* logger = nullptr; // we need a pointer to be able to swap
+    const io::Logger* logger = nullptr; // we need a pointer to be able to copy
     std::queue<char> unget_queue = {};
+
+    // @NOTE: Users cannot default-construct, but we need to when copying.
+    Parser(void) {}
 
     /* These point at the position of the last char read from IN_STREAM.
      * @NOTE: At some point, we might want to better sync line numbers and
      * stream access by hiding the cursor behind getters/setters. Also, lexing
-     * first could be easier - we then just store line numbers with tokens.
+     * first could be easier - we then just store line numbers with tokens
+     * instead of basically "back-tracking" upon errors.
      */
     struct cursor {
         size_t char_no = 0; // 0 means we just increased the line number
@@ -346,7 +353,6 @@ class sjp::Parser {
     JsonValue* null(void);
 
 public:
-    Parser(void) = delete;
     Parser(FILE*, const io::Logger*);
     ~Parser(void) { /* @NOTE: STREAM is _not_ freed. */ }
 
